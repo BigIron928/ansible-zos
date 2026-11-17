@@ -1,0 +1,16 @@
+---
+- name: Submit JCL and fetch output
+  hosts: zoslab
+  gather_facts: false
+
+  environment: "{{ environment_vars }}"
+
+  collections:
+    - ibm.ibm_zos_core
+
+  tasks:
+
+    - name: Submit TSO command
+      zos_tso_command:
+        commands:
+          - alloc da('GAMA01.QSAM5') dsorg(ps) space(1,1) tracks lrecl(80) blksize(16000) recfm(f,b) new catalog
