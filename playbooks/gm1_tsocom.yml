@@ -1,0 +1,32 @@
+# Sample playbook to submit TSO commands   
+- name: TSO Command Example
+  hosts: zoslab
+  gather_facts: false
+  collections:
+    - ibm.ibm_zos_core
+  environment: "{{ environment_vars }}"
+
+  vars:
+    racf_group_id: 'GAMA01'
+
+  tasks:
+    - name: Submit TSO commands
+      zos_tso_command:
+        commands:
+          - "listuser {{ racf_group_id }}"
+      register: result
+
+    - name: Verify user
+      ansible.builtin.assert:
+        that:
+          - result.max_rc == 0
+        fail_msg: "TSO User is already defined"
+        success_msg: "TSO User is defined to RACF"
+
+    - name: Process group definitions in {{ racf_root }}/groups
+      ansible.builtin.include_role:
+        name: zos_racf_group_info
+      ignore_errors: true
+
+    - debug:
+        var: result.max_rc
